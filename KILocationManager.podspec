@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "KILocationManager"
-  s.version      = "0.1"
+  s.version      = "0.0.1"
   s.summary      = "KILocationManager"
   s.description  = <<-DESC
                   KILocationManager.
