@@ -426,6 +426,7 @@
 				18699BE21BE98F6E009E2340 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		18699BE31BE98F6E009E2340 /* Build configuration list for PBXNativeTarget "KILocationManagerTests" */ = {
 			isa = XCConfigurationList;
@@ -434,6 +435,7 @@
 				18699BE51BE98F6E009E2340 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
