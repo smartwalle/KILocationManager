@@ -21,7 +21,8 @@ const double pi = 3.14159265358979324;
 
 @property (nonatomic, copy) KILMDidChangeAuthorizationStatusBlock   didChangeAuthorizationStatusBlock;
 @property (nonatomic, copy) KILMDidUpdateToLocationBlock            didUpdateToLocationBlock;
-@property (nonatomic, copy) KILMdidUpdateLocationsBlock             didUpdateLocationsBlock;
+@property (nonatomic, copy) KILMDidUpdateLocationsBlock             didUpdateLocationsBlock;
+@property (nonatomic, copy) KILMDidUpdatePlacemarkBlock             didUpdatePlacemarkBlock;
 @property (nonatomic, copy) KILMDidFailBlock                        didFailBlock;
 @end
 
@@ -127,12 +128,27 @@ static KILocationManager *KI_LOCATION_MANAGER;
     _didUpdateToLocationBlock = [block copy];
 }
 
-- (void)setDidUpdateLocationsBlock:(KILMdidUpdateLocationsBlock)block {
+- (void)setDidUpdateLocationsBlock:(KILMDidUpdateLocationsBlock)block {
     _didUpdateLocationsBlock = [block copy];
+}
+
+- (void)setDidUpdatePlacemarkBlock:(KILMDidUpdatePlacemarkBlock)block {
+    _didUpdatePlacemarkBlock = [block copy];
 }
 
 - (void)setDidFailBlock:(KILMDidFailBlock)block {
     _didFailBlock = [block copy];
+}
+
+- (void)reverseGeocodeLocation:(CLLocation *)location completionHandler:(KILMDidReverseGeocodeLocationBlock)block {
+    if (block != nil) {
+        __weak KILocationManager *weakSelf = self;
+        CLGeocoder *geocoder = [[CLGeocoder alloc] init];
+        [geocoder reverseGeocodeLocation:location completionHandler:^(NSArray *placemarks, NSError *error) {
+            CLPlacemark *placemark = [placemarks firstObject];
+            block(weakSelf, placemark, error);
+        }];
+    }
 }
 
 
@@ -187,6 +203,13 @@ static KILocationManager *KI_LOCATION_MANAGER;
         self.didUpdateLocationsBlock(self, locations);
     }
     
+    if (self.didUpdatePlacemarkBlock != nil) {
+        __weak KILocationManager *weakSelf = self;
+        [self reverseGeocodeLocation:newLocation completionHandler:^(KILocationManager *locationManager, CLPlacemark *placemark, NSError *error) {
+            weakSelf.didUpdatePlacemarkBlock(weakSelf, newLocation, placemark, error);
+        }];
+    }
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:KILMDidUpdateLocationNotification object:nil];
 }
 
@@ -212,6 +235,13 @@ static KILocationManager *KI_LOCATION_MANAGER;
     
     if (self.didUpdateLocationsBlock) {
         self.didUpdateLocationsBlock(self, locations);
+    }
+    
+    if (self.didUpdatePlacemarkBlock != nil) {
+        __weak KILocationManager *weakSelf = self;
+        [self reverseGeocodeLocation:lastLocation completionHandler:^(KILocationManager *locationManager, CLPlacemark *placemark, NSError *error) {
+            weakSelf.didUpdatePlacemarkBlock(weakSelf, lastLocation, placemark, error);
+        }];
     }
     
     [[NSNotificationCenter defaultCenter] postNotificationName:KILMDidUpdateLocationNotification object:nil];
